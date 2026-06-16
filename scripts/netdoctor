@@ -1,0 +1,26 @@
+#!/bin/bash
+
+echo "=== NETWORK DOCTOR ==="
+echo
+
+# Internet check
+if ping -c 1 8.8.8.8 &>/dev/null
+then
+    internet="OK"
+else
+    internet="FAIL"
+fi
+
+# IP address
+ip_addr=$(ip -4 addr show scope global | grep inet | awk '{print $2}' | head -n1)
+
+# Gateway
+gateway=$(ip route | awk '/default/ {print $3}')
+
+# DNS servers
+dns=$(grep '^nameserver' /etc/resolv.conf | awk '{print $2}' | paste -sd ", " -)
+
+echo "IP Address : ${ip_addr:-Not Found}"
+echo "Gateway    : ${gateway:-Not Found}"
+echo "DNS        : ${dns:-Not Found}"
+echo "Internet   : $internet"

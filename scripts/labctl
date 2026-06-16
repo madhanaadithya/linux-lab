@@ -1,0 +1,116 @@
+#!/usr/bin/bash
+
+case "$1" in
+
+health)
+    
+    echo "=== SYSTEM HEALTH ==="
+    echo
+
+    echo "Hostname: $(hostname)"
+    echo "Kernel: $(uname -r)"
+    echo
+
+
+    echo "Memory:"
+    free -h | grep Mem
+
+    echo
+    echo "Disk:"
+    df -h / | tail -1
+
+    echo
+    echo "SSH Status:"
+    systemctl is-active sshd 2>/dev/null || echo "not installed"
+    ;;
+
+network)
+    echo "=== NETWORK ==="
+    echo
+
+    IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}')
+    GW=$(ip route | awk '/default/ {print $3}')
+
+    echo "Local IP : $IP"
+    echo "Gateway  : $GW"
+
+    echo
+    echo -n "DNS Test: "
+    if getent hosts google.com >/dev/null
+    then
+        echo "PASS"
+    else
+        echo "FAIL"
+    fi
+
+    echo -n "Internet Test: "
+    if ping -c 1 8.8.8.8 >/dev/null 2>&1
+    then
+        echo "PASS"
+    else
+        echo "FAIL"
+    fi
+    ;;
+
+storage)
+    echo "=== STORAGE ==="
+    echo
+
+    df -h
+
+    echo
+    echo "Mounted Drives:"
+    lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
+    ;;
+
+report)
+    FILE="$HOME/labreport-$(date +%F).txt"
+
+    {
+        echo "=== LAB REPORT ==="
+        echo
+        date
+        echo
+
+        hostnamectl
+        echo
+
+        ip a
+        echo
+
+        df -h
+    } > "$FILE"
+
+    echo "Report saved to:"
+    echo "$FILE"
+    ;;
+
+version)
+    echo "labctl v1.0"
+    ;;
+
+--help|-h)
+    echo "labctl v1.0"
+    echo
+    echo "Commands:"
+    echo "  health"
+    echo "  network"
+    echo "  storage"
+    echo "  report"
+    ;;
+
+ports)
+    COUNT=$(ss -tulpn | grep LISTEN | wc -l)
+	echo "== LISTENING PORTS : $COUNT =="
+    ss -tulpn | grep LISTEN
+	;;
+
+*)
+    echo "Usage:"
+    echo "  labctl health"
+    echo "  labctl network"
+    echo "  labctl storage"
+    ;;
+esac
+
+
