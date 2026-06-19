@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+
+commitmsg = "$1"
+
+git add .
+git commit -m "$commitmsg __ %Y-%m-%d %H:%M:%S"
+
+git push origin main
