@@ -2,8 +2,8 @@
 
 
 commitmsg="$1"
-
+current_date=$(date +"%Y-%m-%d %H:%M:%S")
 git add .
-git commit -m "$commitmsg __ %Y-%m-%d %H:%M:%S"
+git commit -m "$commitmsg @ $current_date"
 
 git push origin main
